@@ -11,6 +11,23 @@ use Illuminate\Support\Facades\Http;
 
 class GeneralController extends Controller
 {
+    public function openAt(Request $request) {
+        $time = $request->get("time");
+
+        $result = Location::with('openingHours.hours')->whereHas('openingHours', function ($query) use ($time) {
+            $currentDayOfWeek = intval(date('N')) - 1;
+            $query->where("from", "<=", $currentDayOfWeek)->where("to", ">=", $currentDayOfWeek)->whereHas('hours', function ($query) use ($time){
+                $now = new DateTime($time); //"1970-1-1 23:31"
+                $now->setDate(1970, 1, 1); // override the current year
+                $query->where("from", "<=", $now)->where("to", ">=", $now);
+            });
+        })->get();
+//
+//        return redirect()->back();
+        return view('welcome', [
+            "locations" =>  $result,
+        ]);
+    }
     public function openNow() {
 //        $result = Location::with('openingHours.hours')->get();
 
@@ -22,9 +39,11 @@ class GeneralController extends Controller
                 $query->where("from", "<=", $now)->where("to", ">=", $now);
             });
         })->get();
-        dd($result);
-
-        return redirect()->back();
+//
+//        return redirect()->back();
+        return view('welcome', [
+            "locations" =>  $result,
+        ]);
     }
     public function updateData() {
         $response = Http::get('https://data.pid.cz/pointsOfSale/json/pointsOfSale.json');
@@ -33,7 +52,8 @@ class GeneralController extends Controller
         Hour::truncate();
         OpeningHour::truncate();
         Location::truncate();
-        foreach  (array_slice($locations,0, 50) as $item) {
+//        foreach  (array_slice($locations,0, 50) as $item) {
+        foreach  ($locations as $item) {
 
             $location = new Location;
 
@@ -58,7 +78,8 @@ class GeneralController extends Controller
                 $hours = [];
                 $timeRanges = explode(",", $openingHour->hours);
                 foreach ($timeRanges as $range) {
-                    $times = explode("-", $range);
+                    if (str_contains($range, "-")) $times = explode("-", $range);
+                    else if (str_contains($range, "–")) $times = explode("–", $range);
                     $from = new DateTime("1970-01-01 $times[0]:00");
                     $to = new DateTime("1970-01-01 $times[1]:00");
                     $newHour = [

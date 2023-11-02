@@ -14,7 +14,10 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('welcome', [
+        "locations" => []
+    ]);
 });
 Route::post('/update-data', [App\Http\Controllers\GeneralController::class, 'updateData'])->name('update-data');
 Route::get('/open-now', [App\Http\Controllers\GeneralController::class, 'openNow'])->name('open-now');
+Route::post('/open-at', [App\Http\Controllers\GeneralController::class, 'openAt'])->name('open-at');
