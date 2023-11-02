@@ -15,6 +15,6 @@ class Hour extends Model
     ];
     public function openingHour()
     {
-        return $this->belongsTo(OpeningHour::class);
+        return $this->belongsTo(OpeningHour::class,  "opening_hour_id");
     }
 }

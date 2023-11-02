@@ -15,7 +15,7 @@ class CreateOpeningHoursTable extends Migration
     {
         Schema::create('opening_hours', function (Blueprint $table) {
             $table->id();
-            $table->string('location_id');
+            $table->unsignedBigInteger('location_id');
             $table->integer("from");
             $table->integer("to");
             $table->timestamps();
