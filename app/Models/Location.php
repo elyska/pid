@@ -21,6 +21,6 @@ class Location extends Model
     ];
     public function openingHours()
     {
-        return $this->hasMany(OpeningHour::class, "id");
+        return $this->hasMany(OpeningHour::class, "location_id");
     }
 }

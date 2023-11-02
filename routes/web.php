@@ -27,3 +27,4 @@ Route::get('/open-at', function () {
         "locations" => []
     ]);
 });
+Route::get('/all', [App\Http\Controllers\GeneralController::class, 'allLocations'])->name('all');

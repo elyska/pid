@@ -15,11 +15,13 @@ class GeneralController extends Controller
         $time = $request->get("time");
 
         $result = Location::with('openingHours.hours')->whereHas('openingHours', function ($query) use ($time) {
-            $currentDayOfWeek = intval(date('N')) - 1;
-            $query->where("from", "<=", $currentDayOfWeek)->where("to", ">=", $currentDayOfWeek)->whereHas('hours', function ($query) use ($time){
-                $now = new DateTime($time); //"1970-1-1 23:31"
-                $now->setDate(1970, 1, 1); // override the current year
-                $query->where("from", "<=", $now)->where("to", ">=", $now);
+            $dateTime = new DateTime($time);
+            $dayOfWeek = intval($dateTime->format('N')) - 1;
+//            dd($dayOfWeek);
+            $query->where("from", "<=", $dayOfWeek)->where("to", ">=", $dayOfWeek)->whereHas('hours', function ($query) use ($time){
+                $dateTime = new DateTime($time); //"1970-1-1 23:31"
+                $dateTime->setDate(1970, 1, 1); // override the current year
+                $query->where("from", "<=", $dateTime)->where("to", ">=", $dateTime);
             });
         })->get();
 //
@@ -45,6 +47,14 @@ class GeneralController extends Controller
             "locations" =>  $result,
         ]);
     }
+    public function allLocations() {
+
+        $result = Location::all();
+
+        return view('welcome', [
+            "locations" =>  $result,
+        ]);
+    }
     public function updateData() {
         $response = Http::get('https://data.pid.cz/pointsOfSale/json/pointsOfSale.json');
 
@@ -52,7 +62,7 @@ class GeneralController extends Controller
         Hour::truncate();
         OpeningHour::truncate();
         Location::truncate();
-//        foreach  (array_slice($locations,0, 50) as $item) {
+//        foreach  (array_slice($locations,333, 10) as $item) {
         foreach  ($locations as $item) {
 
             $location = new Location;
